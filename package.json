@@ -1,0 +1,23 @@
+{
+  "name": "dev_tinder_be",
+  "version": "1.0.0",
+  "description": "tinder for devs",
+  "keywords": [
+    "nodejs",
+    "JS"
+  ],
+  "license": "ISC",
+  "author": "Abu",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "scripts":{
+    "start":"node src/app.js",
+    "dev":"nodemon src/app.js"
+  }
+}
