@@ -3,17 +3,15 @@ const app=express()
 const connectDB=require('./config/database')
 const User=require('./models/user')
 
+app.use(express.json());
+
 app.post('/signup', async (req,res)=>{
     //creating instance of schema
-    const user =new User({
-        firstName:"Umar",
-        lastName:"M S",
-        age:"31",
-        email:"umar@gmail.com",
-        password:"umar123"
-    })
-    await user.save()
+
+    const user=new User(req.body)
+    
     try{
+        await user.save()
         res.send("signup success")
 
     }
