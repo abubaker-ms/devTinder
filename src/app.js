@@ -5,7 +5,7 @@ const User=require('./models/user')
 const validateSignup=require('./ultils/validation')
 const bcrypt = require('bcrypt');
 const jwt=require('jsonwebtoken')
-
+const auth=require('./middlewares/auth')
 app.use(express.json());
 
 //get user by email
@@ -44,7 +44,7 @@ app.post('/signIn',async(req,res)=>{
 
         try{
             if(!isUser){
-                throw new Error('Invalid Credentials')
+                throw new Error('user not found')
             }
     
             // decrypt password
@@ -53,7 +53,7 @@ app.post('/signIn',async(req,res)=>{
 
             const isPasswordValid= await bcrypt.compare(password,DBpassword)
             if(!isPasswordValid){
-                throw new Error('Invalid Credentials')
+                throw new Error('Invalid password')
             }
 
             const token=jwt.sign({_id:isUser._id},"secret@123")
@@ -68,18 +68,10 @@ app.post('/signIn',async(req,res)=>{
     
 })
 
-app.get('/profile',async (req,res)=>{
-    // const cookies=req.cookies
-    // const {token}=cookies
-    let token=req.headers.cookie?.split('token=')[1]
-    if(!token){
-        throw new Error("unauthorized user")
-    }
-    // console.log(req.headers.cookie?.split('token=')[1],"tojken")
-    // const decodedToken=jwt.verify(token,"secret@123")
-    const decodedUser=await jwt.verify(token,"secret@123")
-    const user=await User.findOne({_id:decodedUser})
-    res.send("autenticated scuccess")
+app.get('/profile',auth, (req,res)=>{
+    const {user}=req
+     res.send(user)
+
 })
 
 app.post('/signup', async (req,res)=>{
