@@ -4,6 +4,7 @@ const connectDB=require('./config/database')
 const User=require('./models/user')
 const validateSignup=require('./ultils/validation')
 const bcrypt = require('bcrypt');
+const jwt=require('jsonwebtoken')
 
 app.use(express.json());
 
@@ -54,7 +55,10 @@ app.post('/signIn',async(req,res)=>{
             if(!isPasswordValid){
                 throw new Error('Invalid Credentials')
             }
-    
+
+            const token=jwt.sign({_id:isUser._id},"secret@123")
+            // console.log(token)
+            res.cookie("token",token)
             res.send("login success")
         }
         catch(err){
@@ -62,6 +66,20 @@ app.post('/signIn',async(req,res)=>{
         }
  
     
+})
+
+app.get('/profile',async (req,res)=>{
+    // const cookies=req.cookies
+    // const {token}=cookies
+    let token=req.headers.cookie?.split('token=')[1]
+    if(!token){
+        throw new Error("unauthorized user")
+    }
+    // console.log(req.headers.cookie?.split('token=')[1],"tojken")
+    // const decodedToken=jwt.verify(token,"secret@123")
+    const decodedUser=await jwt.verify(token,"secret@123")
+    const user=await User.findOne({_id:decodedUser})
+    res.send("autenticated scuccess")
 })
 
 app.post('/signup', async (req,res)=>{
@@ -147,4 +165,7 @@ connectDB().then(()=>{
 .catch((err)=>{
     console.log(err)
 })
+
+
+
 
