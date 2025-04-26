@@ -2,6 +2,8 @@ const express=require("express")
 const app=express()
 const connectDB=require('./config/database')
 const User=require('./models/user')
+const validateSignup=require('./ultils/validation')
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
 
@@ -34,12 +36,50 @@ app.get('/feed',async(req,res)=>{
     }
 })
 
-app.post('/signup', async (req,res)=>{
-    //creating instance of schema
+app.post('/signIn',async(req,res)=>{
+    const {emailId,password}=req.body
+    // check if email exists
+    const isUser= await User.findOne({emailId})
 
-    const user=new User(req.body)
+        try{
+            if(!isUser){
+                throw new Error('Invalid Credentials')
+            }
+    
+            // decrypt password
+            const DBpassword=isUser.password
+            console.log(isUser)
+
+            const isPasswordValid= await bcrypt.compare(password,DBpassword)
+            if(!isPasswordValid){
+                throw new Error('Invalid Credentials')
+            }
+    
+            res.send("login success")
+        }
+        catch(err){
+            res.send(err.message)
+        }
+ 
+    
+})
+
+app.post('/signup', async (req,res)=>{
+
+    //creating instance of schema
+    const {password,firstName,lastName,emailId}=req.body
     
     try{
+
+        const hashPassword=await bcrypt.hash(password,10)
+        validateSignup(req.body);
+        const user=new User({
+            firstName,
+            lastName,
+            password:hashPassword,
+            emailId
+        })
+
         await user.save()
         res.send("signup success")
 
